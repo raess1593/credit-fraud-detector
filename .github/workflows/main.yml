@@ -9,5 +9,4 @@ on:
 
 jobs:
     call-lint:
-        uses: ./.github/workflows/lint.yml@main
-        
+        uses: ./.github/workflows/lint.yml
