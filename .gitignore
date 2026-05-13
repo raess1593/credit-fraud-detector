@@ -1,2 +1,12 @@
+# .venv/
 .venv/
+
+# Python bytecode files
+__pycache__/
+*.pyc
+
+# Environment variables file
 .env
+
+# Coverage reports
+.coverage
