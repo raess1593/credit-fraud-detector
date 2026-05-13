@@ -1,19 +1,24 @@
-import pandas as pd
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
+import pandas as pd
+
 from src.data import load_data
 
+
 class TestDataLoading(unittest.TestCase):
-    
+
     @patch("src.data.load_dataset")
     def test_load_data(self, mock_load_dataset):
         """Test if load_data function returns X and y dataframes"""
         mock_hf = Mock()
-        mock_hf.to_pandas.return_value = pd.DataFrame({"Feature1": [1, 2], "Class": [0, 1]})
+        mock_hf.to_pandas.return_value = pd.DataFrame(
+            {"Feature1": [1, 2], "Class": [0, 1]}
+        )
         mock_load_dataset.return_value = {"train": mock_hf}
 
         X, y = load_data()
-        
+
         self.assertIsNotNone(X)
         self.assertIsNotNone(y)
         self.assertEqual(len(X), len(y))
@@ -26,7 +31,7 @@ class TestDataLoading(unittest.TestCase):
 
         with self.assertRaises(Exception) as context:
             load_data()
-        
+
         self.assertIn("Dataset not found", str(context.exception))
 
     @patch("src.data.load_dataset")
@@ -37,9 +42,10 @@ class TestDataLoading(unittest.TestCase):
         mock_load_dataset.return_value = {"train": mock_hf}
 
         X, y = load_data()
-        
+
         self.assertTrue(X.empty)
         self.assertTrue(y.empty)
+
 
 if __name__ == "__main__":
     unittest.main()
