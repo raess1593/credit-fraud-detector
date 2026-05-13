@@ -1,0 +1,12 @@
+PyYAML==6.0.3
+Pygments==2.20.0
+charset-normalizer==3.4.7
+datasets==4.8.5
+huggingface_hub==1.14.0
+isort==8.0.1
+mdurl==0.1.2
+mypy_extensions==1.1.0
+pip-chill==1.0.5
+python-dotenv==1.2.2
+pytokens==0.4.1
+scikit-learn==1.8.0

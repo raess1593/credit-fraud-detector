@@ -1,0 +1,13 @@
+name: Main Workflow
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    call-lint:
+        uses: ./.github/workflows/lint.yml@main
+        
