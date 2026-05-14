@@ -1,4 +1,5 @@
 model_active: "random_forest"
+f1_threshold: 0.8
 seed: 42
 
 models:

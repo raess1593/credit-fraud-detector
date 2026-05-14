@@ -55,5 +55,9 @@ with mlflow.start_run(run_name=f"{model_active}_run"):
         "test_f1": f1_score(y_test, y_pred),
     }
     mlflow.log_metrics(metrics)
+
+    if f1_score(y_test, y_pred) > config["f1_threshold"]:
+        mlflow.set_tag("stage", "production")
+
     print("Test metrics:")
     print(metrics)
