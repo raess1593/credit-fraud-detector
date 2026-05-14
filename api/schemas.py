@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 class TransactionInput(BaseModel):
     Time: float = Field(
-        ..., 
+        ...,
         description="Seconds elapsed since the first transaction",
         json_schema_extra={"example": 0.0},
     )
