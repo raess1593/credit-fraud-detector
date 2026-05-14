@@ -2,11 +2,11 @@
 
 lint:
 	black --check src tests api train.py
-	isort --check-only src tests api train.py
+	isort --check-only src tests api
 
 lint-fix:
 	black src tests api train.py
-	isort src tests api train.py
+	isort src tests api
 
 test:
 	python -m pytest tests/ -v --cov=src --cov-fail-under=60

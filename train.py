@@ -4,8 +4,7 @@ import mlflow
 import yaml
 from dotenv import load_dotenv
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import (accuracy_score, f1_score, precision_score,
-                             recall_score)
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler

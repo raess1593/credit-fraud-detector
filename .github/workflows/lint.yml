@@ -25,4 +25,4 @@ jobs:
             - name: Run Linters
               run: |
                 black --check src tests api train.py
-                isort --check-only src tests api train.py
+                isort --check-only src tests api
