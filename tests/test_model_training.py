@@ -38,7 +38,9 @@ class TestModelTraining(unittest.TestCase):
         built_model = get_model()
 
         mock_load_app_config.assert_called_once_with(config_path=None)
-        mock_load_model_config.assert_called_once_with("random_forest")
+        mock_load_model_config.assert_called_once_with(
+            "random_forest", config_path=None
+        )
         mock_classifier.assert_called_once_with(n_estimators=50, random_state=42)
         self.assertEqual(built_model, mock_model)
 
@@ -64,7 +66,7 @@ class TestModelTraining(unittest.TestCase):
             built_model = get_model()
 
         mock_load_app_config.assert_called_once_with(config_path=None)
-        mock_load_model_config.assert_called_once_with("xgboost")
+        mock_load_model_config.assert_called_once_with("xgboost", config_path=None)
         mock_import_module.assert_called_once_with("xgboost")
         mock_xgboost_module.XGBClassifier.assert_called_once_with(n_estimators=100)
         self.assertEqual(built_model, mock_model)
@@ -102,7 +104,7 @@ class TestModelTraining(unittest.TestCase):
 
         result = main()
 
-        mock_get_model.assert_called_once_with(config_path=None)
+        mock_get_model.assert_called_once_with(app_config_path=None)
         mock_load_data.assert_called_once()
         mock_train_model.assert_called_once_with(
             mock_model, mock_load_data.return_value[0], mock_load_data.return_value[1]
