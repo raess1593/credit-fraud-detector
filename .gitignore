@@ -10,3 +10,10 @@ __pycache__/
 
 # Coverage reports
 .coverage
+
+# MLflow artifacts
+mlruns/
+mlartifacts/
+
+# Data files
+*.db
