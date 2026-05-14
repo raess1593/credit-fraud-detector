@@ -2,6 +2,8 @@
 
 Estructura inicial para aprendizaje de modelos:
 
-- `src/models/train_random_forest.py`: entrenamiento de Random Forest
-- `src/models/train_xgboost.py`: entrenamiento de XGBoost
+- `configs/config.yaml`: define `model_active`
+- `src/models/models.py`: `get_model()` construye el modelo activo usando YAMLs de parámetros
+- `src/main.py`: punto central que llama a `get_model()` y ejecuta entrenamiento
+- `src/train.py`: script de entrenamiento reutilizable
 - `configs/models/*.yaml`: parámetros configurables por modelo
