@@ -1,11 +1,13 @@
 import os
+
 import mlflow
-from mlflow.client import MlflowClient
 import mlflow.pyfunc
 import pandas as pd
-from fastapi import FastAPI, HTTPException
-from api.schemas import TransactionInput
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from mlflow.client import MlflowClient
+
+from api.schemas import TransactionInput
 
 load_dotenv()
 
@@ -46,7 +48,8 @@ def predict(transaction: TransactionInput):
         raise HTTPException(status_code=404, detail="Production model not found")
     best_run = runs[0]
     model_uri = f"runs:/{best_run.info.run_id}/model"
-    production_model = mlflow.pyfunc.load_model(model_uri)
+    if production_model is None:
+        production_model = mlflow.pyfunc.load_model(model_uri)
     if production_model is None:
         raise HTTPException(status_code=500, detail="Failed to load production model")
 
