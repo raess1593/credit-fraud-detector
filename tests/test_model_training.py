@@ -102,9 +102,11 @@ class TestModelTraining(unittest.TestCase):
         )
         mock_train_model.return_value = mock_model
 
-        result = main()
+        result = main(config_path="/tmp/app_config.yaml")
 
-        mock_get_model.assert_called_once_with(app_config_path=None)
+        mock_get_model.assert_called_once_with(
+            app_config_path="/tmp/app_config.yaml", model_config_path=None
+        )
         mock_load_data.assert_called_once()
         mock_train_model.assert_called_once_with(
             mock_model, mock_load_data.return_value[0], mock_load_data.return_value[1]

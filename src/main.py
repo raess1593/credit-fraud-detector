@@ -5,9 +5,9 @@ from src.models.models import get_model
 from src.train import train_model
 
 
-def main(config_path: str | None = None) -> Any:
+def main(config_path: str | None = None, model_config_path: str | None = None) -> Any:
     """Run end-to-end training pipeline."""
-    model = get_model(app_config_path=config_path)
+    model = get_model(app_config_path=config_path, model_config_path=model_config_path)
     X, y = load_data()
     return train_model(model, X, y)
 
