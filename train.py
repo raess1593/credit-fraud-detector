@@ -1,14 +1,16 @@
 import os
+
 import mlflow
 import yaml
+from dotenv import load_dotenv
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
 from src.data import load_data
 from src.models import load_model
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from dotenv import load_dotenv
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 load_dotenv()
 
@@ -53,5 +55,9 @@ with mlflow.start_run(run_name=f"{model_active}_run"):
         "test_f1": f1_score(y_test, y_pred),
     }
     mlflow.log_metrics(metrics)
+
+    if f1_score(y_test, y_pred) > config["f1_threshold"]:
+        mlflow.set_tag("stage", "production")
+
     print("Test metrics:")
     print(metrics)

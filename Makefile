@@ -1,12 +1,21 @@
-.PHONY: lint test
+.PHONY: lint test train mlflow api
 
 lint:
-	black --check src tests
-	isort --check-only src tests
+	black --check src tests api train.py
+	isort --check-only src tests api
 
 lint-fix:
-	black src tests
-	isort src tests
+	black src tests api train.py
+	isort src tests api
 
 test:
 	python -m pytest tests/ -v --cov=src --cov-fail-under=60
+
+train:
+	python train.py
+
+mlflow:
+	mlflow ui
+
+api:
+	uvicorn api.api:app --reload
