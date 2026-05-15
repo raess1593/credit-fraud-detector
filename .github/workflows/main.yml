@@ -10,9 +10,11 @@ on:
 jobs:
     call-lint:
         uses: ./.github/workflows/lint.yml
+
     call-test:
         needs: call-lint
         uses: ./.github/workflows/test.yml
+
     call-deploy:
         needs: call-test
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
