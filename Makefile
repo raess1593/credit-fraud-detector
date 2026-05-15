@@ -1,4 +1,4 @@
-.PHONY: lint test train mlflow api
+.PHONY: lint test train mlflow api terraform
 
 lint:
 	black --check src tests api train.py
@@ -19,3 +19,6 @@ mlflow:
 
 api:
 	uvicorn api.api:app --reload
+
+terraform:
+	cd terraform && terraform init && terraform apply -auto-approve
