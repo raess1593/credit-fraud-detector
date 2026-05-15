@@ -1,5 +1,6 @@
 model_active: "random_forest"
 f1_threshold: 0.8
+model_registry_name: "credit-fraud-detector"
 seed: 42
 
 models:

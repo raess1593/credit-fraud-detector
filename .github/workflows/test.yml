@@ -1,27 +1,27 @@
 name: Test Workflow
 
 on:
-    workflow_call:
+  workflow_call:
 
 jobs:
-    test:
-        runs-on: ubuntu-22.04
-        steps:
-            - name: Checkout Code
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-            - name: Python Setup
-              uses: actions/setup-python@v5
-              with:
-                python-version: 3.11
-                cache: 'pip'
+      - name: Python Setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+          cache: 'pip'
 
-            - name: Install Dependencies
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-                pip install pytest pytest-cov
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
 
-            - name: Run Tests
-              run: |
-                python -m pytest tests/ -v --cov=src --cov-fail-under=60
+      - name: Run Tests
+        run: |
+          python -m pytest tests/ -v --cov=src --cov-fail-under=60
