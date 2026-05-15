@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  TF_VAR_artifacts_bucket_name: ${{ secrets.TF_ARTIFACTS_BUCKET }}
+  MLFLOW_IMAGE: ghcr.io/mlflow/mlflow:v2.11.3
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push API image
+        run: |
+          docker build -t cfd-api -f Dockerfile.api .
+          docker tag cfd-api:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-api:${GITHUB_SHA}"
+          docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-api:${GITHUB_SHA}"
+
+      - name: Build and push training image
+        run: |
+          docker build -t cfd-train -f Dockerfile.train .
+          docker tag cfd-train:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-training:${GITHUB_SHA}"
+          docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-training:${GITHUB_SHA}"
+
+      - name: Terraform apply
+        working-directory: terraform
+        env:
+          TF_VAR_api_image: "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-api:${GITHUB_SHA}"
+          TF_VAR_mlflow_image: ${{ env.MLFLOW_IMAGE }}
+        run: |
+          terraform init
+          terraform apply -auto-approve
