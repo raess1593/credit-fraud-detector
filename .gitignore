@@ -22,3 +22,7 @@ mlartifacts/
 terraform/*.tfstate
 terraform/*.tfstate.backup
 terraform/.terraform/
+
+# Terraform variable files (often contain environment-specific values)
+terraform/*.tfvars
+terraform/*.tfvars.json

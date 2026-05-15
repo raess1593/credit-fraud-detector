@@ -1,0 +1,6 @@
+# Example values for local development. Copy to dev.tfvars and adjust.
+
+artifacts_bucket_name = "credit-fraud-detector-artifacts-<unique>"
+
+api_image    = "<account-id>.dkr.ecr.us-east-1.amazonaws.com/credit-fraud-detector-api:<tag>"
+mlflow_image = "ghcr.io/mlflow/mlflow:v2.11.3"
