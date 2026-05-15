@@ -17,3 +17,8 @@ mlartifacts/
 
 # Data files
 *.db
+
+# Terraform state files
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform/
