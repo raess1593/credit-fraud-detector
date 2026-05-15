@@ -36,7 +36,9 @@ def wait_for_model_version_ready(client: MlflowClient, name: str, version: str) 
         time.sleep(1)
 
 
-def get_production_f1(client: MlflowClient, name: str) -> tuple[float | None, str | None]:
+def get_production_f1(
+    client: MlflowClient, name: str
+) -> tuple[float | None, str | None]:
     versions = client.get_latest_versions(name, stages=["Production"])
     if not versions:
         return None, None
@@ -44,12 +46,15 @@ def get_production_f1(client: MlflowClient, name: str) -> tuple[float | None, st
     run = client.get_run(version.run_id)
     return run.data.metrics.get("test_f1"), version.version
 
+
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"))
 mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "credit-fraud-detector"))
 mlflow.autolog()
 
 if not model_name:
-    raise ValueError("Missing model registry name. Set MLFLOW_MODEL_NAME or config model_registry_name.")
+    raise ValueError(
+        "Missing model registry name. Set MLFLOW_MODEL_NAME or config model_registry_name."
+    )
 
 with mlflow.start_run(run_name=f"{model_active}_run"):
     print(f"Training {model_active} with config: {model_config}")
