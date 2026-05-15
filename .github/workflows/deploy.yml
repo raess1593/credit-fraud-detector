@@ -43,6 +43,11 @@ jobs:
           docker tag cfd-train:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-training:${GITHUB_SHA}"
           docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-training:${GITHUB_SHA}"
 
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v3
+        with:
+            terraform_version: "1.7.0"
+      
       - name: Terraform apply
         working-directory: terraform
         env:
