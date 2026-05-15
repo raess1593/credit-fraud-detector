@@ -5,7 +5,6 @@ import mlflow.pyfunc
 import pandas as pd
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
-from mlflow.client import MlflowClient
 
 from api.schemas import TransactionInput
 
@@ -18,6 +17,7 @@ app = FastAPI(
 )
 
 production_model = None
+production_model_uri = None
 
 
 @app.get("/")
@@ -28,28 +28,20 @@ def read_root():
 @app.post("/predict")
 def predict(transaction: TransactionInput):
     global production_model
-
-    client = MlflowClient()
+    global production_model_uri
     mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.1:5000"))
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "credit-fraud-detector"))
 
-    experiment = client.get_experiment_by_name(
-        os.getenv("MLFLOW_EXPERIMENT_NAME", "credit-fraud-detector")
-    )
-    if experiment is None:
-        raise HTTPException(status_code=404, detail="Experiment not found")
-    runs = client.search_runs(
-        experiment_ids=[experiment.experiment_id],
-        filter_string="tags.stage = 'production'",
-        order_by=["metrics.test_f1 DESC"],
-        max_results=1,
-    )
-    if not runs:
-        raise HTTPException(status_code=404, detail="Production model not found")
-    best_run = runs[0]
-    model_uri = f"runs:/{best_run.info.run_id}/model"
-    if production_model is None:
-        production_model = mlflow.pyfunc.load_model(model_uri)
+    model_name = os.getenv("MLFLOW_MODEL_NAME", "credit-fraud-detector")
+    model_uri = f"models:/{model_name}/Production"
+    if production_model is None or production_model_uri != model_uri:
+        try:
+            production_model = mlflow.pyfunc.load_model(model_uri)
+            production_model_uri = model_uri
+        except Exception as exc:
+            raise HTTPException(
+                status_code=404, detail="Production model not found"
+            ) from exc
     if production_model is None:
         raise HTTPException(status_code=500, detail="Failed to load production model")
 
