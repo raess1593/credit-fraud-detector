@@ -20,6 +20,7 @@ jobs:
         uses: ./.github/workflows/test.yml
 
     call-deploy:
-        if: github.ref == 'refs/heads/fix/final' || github.head_ref == 'fix/final'
+        needs: call-test
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.ref == 'refs/heads/fix/final' || github.head_ref == 'fix/final')
         uses: ./.github/workflows/deploy.yml
         secrets: inherit
