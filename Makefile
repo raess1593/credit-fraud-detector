@@ -21,4 +21,4 @@ api:
 	uvicorn api.api:app --reload
 
 terraform:
-	cd terraform && terraform init && terraform apply -auto-approve
+	cd terraform && terraform init && terraform apply -var-file=dev.tfvars -auto-approve

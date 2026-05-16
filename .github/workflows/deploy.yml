@@ -2,6 +2,15 @@ name: Deploy
 
 on:
   workflow_call:
+    secrets:
+      AWS_REGION:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      TF_ARTIFACTS_BUCKET:
+        required: true
+      AWS_ROLE_ARN:
+        required: true
   workflow_dispatch:
 
 env:
@@ -34,24 +43,24 @@ jobs:
       - name: Build and push API image
         run: |
           docker build -t cfd-api -f Dockerfile.api .
-          docker tag cfd-api:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-api:${GITHUB_SHA}"
-          docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-api:${GITHUB_SHA}"
+          docker tag cfd-api:latest "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}://{{ github.sha }}"
+          docker push "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}://{{ github.sha }}"
 
       - name: Build and push training image
         run: |
           docker build -t cfd-train -f Dockerfile.train .
-          docker tag cfd-train:latest "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-training:${GITHUB_SHA}"
-          docker push "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-training:${GITHUB_SHA}"
+          docker tag cfd-train:latest "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}://{{ github.sha }}"
+          docker push "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}://{{ github.sha }}"
 
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v3
         with:
-            terraform_version: "1.7.0"
+          terraform_version: "1.7.0"
       
       - name: Terraform apply
         working-directory: terraform
         env:
-          TF_VAR_api_image: "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/credit-fraud-detector-dev-api:${GITHUB_SHA}"
+          TF_VAR_api_image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}://{{ github.sha }}
           TF_VAR_mlflow_image: ${{ env.MLFLOW_IMAGE }}
         run: |
           terraform init
