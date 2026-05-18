@@ -15,3 +15,12 @@ resource "aws_cloudwatch_log_group" "api" {
     Name = "${local.name_prefix}-api-logs"
   })
 }
+
+resource "aws_cloudwatch_log_group" "training" {
+  name              = "/ecs/${local.name_prefix}-training"
+  retention_in_days = var.log_retention_days
+
+  tags = merge(local.tags, {
+    Name = "${local.name_prefix}-training-logs"
+  })
+}

@@ -44,6 +44,29 @@ models:/<model_name>/Production
 
 ---
 
+## 🧰 Data & Orchestration (DVC + Dagster)
+This project adds two production-grade layers:
+
+**DVC (Data Version Control)**
+- Tracks the raw dataset as a reproducible artifact.
+- Provides a deterministic pipeline for fetching data and training.
+
+Run locally:
+```
+dvc repro
+```
+
+**Dagster (Orchestration)**
+- Orchestrates the data fetch + training flow as a job.
+- Enables future scheduling, retries, and observability.
+
+Run locally:
+```
+dagster dev -f orchestration/defs.py
+```
+
+---
+
 ## 🔐 Security Notes
 - **No secrets in Git**: `.env` and `*.tfvars` are ignored.
 - **RDS password** is managed by **AWS Secrets Manager**.
@@ -107,6 +130,10 @@ If destroy fails because ECR repos are not empty, delete images or keep `force_d
 `main.yml` orchestrates lint, tests, and deploy:
 - Lint + Tests on push/PR to `main`
 - Deploy on push to `main` (or manual dispatch)
+
+**Training automation (AWS-native):**
+- EventBridge schedules an ECS Fargate task that runs the Dagster job.
+- The task pulls data from DVC on S3 and logs to MLflow.
 
 **Required GitHub Secrets:**
 - `AWS_ROLE_ARN`

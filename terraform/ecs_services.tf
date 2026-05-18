@@ -220,6 +220,58 @@ resource "aws_ecs_task_definition" "api" {
   ])
 }
 
+resource "aws_ecs_task_definition" "training" {
+  family                   = "${local.name_prefix}-training"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = var.training_cpu
+  memory                   = var.training_memory
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  container_definitions = jsonencode([
+    {
+      name  = "training"
+      image = var.training_image
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.training.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "ecs"
+        }
+      }
+      environment = [
+        {
+          name  = "MLFLOW_TRACKING_URI"
+          value = "http://${aws_lb.internal.dns_name}:5000"
+        },
+        {
+          name  = "MLFLOW_EXPERIMENT_NAME"
+          value = "credit-fraud-detector"
+        },
+        {
+          name  = "MLFLOW_MODEL_NAME"
+          value = "credit-fraud-detector"
+        },
+        {
+          name  = "DATA_PATH"
+          value = "data/raw/creditcard.parquet"
+        },
+        {
+          name  = "DVC_REMOTE_URL"
+          value = "s3://${var.dvc_bucket_name}"
+        }
+      ]
+      command = [
+        "/bin/sh",
+        "-c",
+        "dvc init -q --no-scm && dvc remote add -f -d storage $${DVC_REMOTE_URL} && dvc pull && dagster job execute -f orchestration/defs.py -j training_job"
+      ]
+    }
+  ])
+}
+
 resource "aws_ecs_service" "mlflow" {
   name            = "${local.name_prefix}-mlflow"
   cluster         = aws_ecs_cluster.main.id

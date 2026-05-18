@@ -42,3 +42,8 @@ output "ecr_training_repo" {
   description = "ECR repository for training"
   value       = aws_ecr_repository.training.repository_url
 }
+
+output "training_task_definition" {
+  description = "Training task definition ARN"
+  value       = aws_ecs_task_definition.training.arn
+}
