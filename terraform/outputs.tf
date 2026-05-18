@@ -23,6 +23,11 @@ output "mlflow_artifacts_bucket" {
   value       = aws_s3_bucket.mlflow_artifacts.bucket
 }
 
+output "dvc_bucket" {
+  description = "S3 bucket for DVC data"
+  value       = aws_s3_bucket.dvc_data.bucket
+}
+
 output "alb_internal_dns" {
   description = "Internal ALB DNS name"
   value       = aws_lb.internal.dns_name
@@ -41,4 +46,9 @@ output "ecr_mlflow_repo" {
 output "ecr_training_repo" {
   description = "ECR repository for training"
   value       = aws_ecr_repository.training.repository_url
+}
+
+output "training_task_definition" {
+  description = "Training task definition ARN"
+  value       = aws_ecs_task_definition.training.arn
 }

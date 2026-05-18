@@ -44,6 +44,8 @@ data "aws_iam_policy_document" "ecs_task_s3" {
     resources = [
       aws_s3_bucket.mlflow_artifacts.arn,
       "${aws_s3_bucket.mlflow_artifacts.arn}/*",
+      "arn:aws:s3:::${var.dvc_bucket_name}",
+      "arn:aws:s3:::${var.dvc_bucket_name}/*",
     ]
   }
 }

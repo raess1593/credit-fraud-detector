@@ -11,4 +11,7 @@ scikit-learn==1.8.0
 datasets
 huggingface_hub
 PyYAML
-
+dagster
+dagster-webserver
+dvc[s3]
+pyarrow

@@ -1,0 +1,19 @@
+stages:
+  fetch_data:
+    cmd: python scripts/fetch_data.py --output data/raw/creditcard.parquet
+    deps:
+      - scripts/fetch_data.py
+      - src/data.py
+    outs:
+      - data/raw/creditcard.parquet
+
+  train:
+    cmd: python train.py
+    deps:
+      - train.py
+      - src/data.py
+      - src/models.py
+      - config/config.yaml
+      - data/raw/creditcard.parquet
+    metrics:
+      - metrics.json

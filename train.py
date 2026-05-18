@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -47,72 +48,81 @@ def get_production_f1(
     return run.data.metrics.get("test_f1"), version.version
 
 
-mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"))
-mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "credit-fraud-detector"))
-mlflow.autolog()
+def run_training(data_path: str | None = None, metrics_path: str | None = None) -> None:
+    mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000"))
+    mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "credit-fraud-detector"))
+    mlflow.autolog()
 
-if not model_name:
-    raise ValueError(
-        "Missing model registry name. Set MLFLOW_MODEL_NAME or config model_registry_name."
-    )
+    if not model_name:
+        raise ValueError(
+            "Missing model registry name. Set MLFLOW_MODEL_NAME or config model_registry_name."
+        )
 
-with mlflow.start_run(run_name=f"{model_active}_run"):
-    print(f"Training {model_active} with config: {model_config}")
-    X, y = load_data()
-    model = load_model(model_name=model_active, hyperparameters=model_config)
+    with mlflow.start_run(run_name=f"{model_active}_run"):
+        print(f"Training {model_active} with config: {model_config}")
+        X, y = load_data(data_path=data_path)
+        model = load_model(model_name=model_active, hyperparameters=model_config)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, stratify=y, shuffle=True, random_state=config["seed"]
-    )
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, stratify=y, shuffle=True, random_state=config["seed"]
+        )
 
-    print(f"Train set size: {len(X_train)}, Test set size: {len(X_test)}")
-    pipeline = Pipeline(
-        [
-            ("imputer", SimpleImputer(strategy="median")),
-            ("scaler", StandardScaler()),
-            ("model", model),
-        ]
-    )
+        print(f"Train set size: {len(X_train)}, Test set size: {len(X_test)}")
+        pipeline = Pipeline(
+            [
+                ("imputer", SimpleImputer(strategy="median")),
+                ("scaler", StandardScaler()),
+                ("model", model),
+            ]
+        )
 
-    print("Fitting the model...")
-    pipeline.fit(X_train, y_train)
-    y_pred = pipeline.predict(X_test)
+        print("Fitting the model...")
+        pipeline.fit(X_train, y_train)
+        y_pred = pipeline.predict(X_test)
 
-    metrics = {
-        "test_accuracy": accuracy_score(y_test, y_pred),
-        "test_precision": precision_score(y_test, y_pred),
-        "test_recall": recall_score(y_test, y_pred),
-        "test_f1": f1_score(y_test, y_pred),
-    }
-    mlflow.log_metrics(metrics)
+        metrics = {
+            "test_accuracy": accuracy_score(y_test, y_pred),
+            "test_precision": precision_score(y_test, y_pred),
+            "test_recall": recall_score(y_test, y_pred),
+            "test_f1": f1_score(y_test, y_pred),
+        }
+        mlflow.log_metrics(metrics)
 
-    mlflow.sklearn.log_model(pipeline, artifact_path="model")
-    run_id = mlflow.active_run().info.run_id
-    model_uri = f"runs:/{run_id}/model"
-    client = MlflowClient()
-    registered = mlflow.register_model(model_uri, model_name)
-    wait_for_model_version_ready(client, model_name, registered.version)
+        metrics_output = metrics_path or os.getenv("METRICS_PATH", "metrics.json")
+        with open(metrics_output, "w") as f:
+            json.dump(metrics, f, indent=2)
 
-    new_f1 = metrics["test_f1"]
-    if new_f1 >= f1_threshold:
-        prod_f1, _ = get_production_f1(client, model_name)
-        if prod_f1 is None or new_f1 > prod_f1:
-            client.transition_model_version_stage(
-                name=model_name,
-                version=registered.version,
-                stage="Production",
-                archive_existing_versions=True,
-            )
-            mlflow.set_tag("promotion", "production")
+        mlflow.sklearn.log_model(pipeline, artifact_path="model")
+        run_id = mlflow.active_run().info.run_id
+        model_uri = f"runs:/{run_id}/model"
+        client = MlflowClient()
+        registered = mlflow.register_model(model_uri, model_name)
+        wait_for_model_version_ready(client, model_name, registered.version)
+
+        new_f1 = metrics["test_f1"]
+        if new_f1 >= f1_threshold:
+            prod_f1, _ = get_production_f1(client, model_name)
+            if prod_f1 is None or new_f1 > prod_f1:
+                client.transition_model_version_stage(
+                    name=model_name,
+                    version=registered.version,
+                    stage="Production",
+                    archive_existing_versions=True,
+                )
+                mlflow.set_tag("promotion", "production")
+            else:
+                client.transition_model_version_stage(
+                    name=model_name,
+                    version=registered.version,
+                    stage="Staging",
+                )
+                mlflow.set_tag("promotion", "staging")
         else:
-            client.transition_model_version_stage(
-                name=model_name,
-                version=registered.version,
-                stage="Staging",
-            )
-            mlflow.set_tag("promotion", "staging")
-    else:
-        mlflow.set_tag("promotion", "rejected")
+            mlflow.set_tag("promotion", "rejected")
 
-    print("Test metrics:")
-    print(metrics)
+        print("Test metrics:")
+        print(metrics)
+
+
+if __name__ == "__main__":
+    run_training()

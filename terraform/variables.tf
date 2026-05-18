@@ -76,6 +76,16 @@ variable "mlflow_image" {
   default     = "ghcr.io/mlflow/mlflow:v2.11.3"
 }
 
+variable "training_image" {
+  description = "Container image URI for the training task"
+  type        = string
+}
+
+variable "dvc_bucket_name" {
+  description = "S3 bucket name for DVC data artifacts"
+  type        = string
+}
+
 variable "api_cpu" {
   description = "Fargate CPU units for API"
   type        = number
@@ -98,6 +108,24 @@ variable "mlflow_memory" {
   description = "Fargate memory (MiB) for MLflow"
   type        = number
   default     = 512
+}
+
+variable "training_cpu" {
+  description = "Fargate CPU units for training"
+  type        = number
+  default     = 512
+}
+
+variable "training_memory" {
+  description = "Fargate memory (MiB) for training"
+  type        = number
+  default     = 1024
+}
+
+variable "training_schedule_cron" {
+  description = "EventBridge cron schedule for training"
+  type        = string
+  default     = "cron(0 3 ? * MON *)"
 }
 
 variable "api_desired_count" {

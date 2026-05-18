@@ -11,5 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY train.py ./
 COPY src ./src
 COPY config ./config
+COPY dvc.yaml ./
+COPY orchestration ./orchestration
+COPY scripts ./scripts
 
 CMD ["python", "train.py"]
