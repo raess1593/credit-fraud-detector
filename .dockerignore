@@ -12,5 +12,4 @@ tests
 *.log
 .env
 .env.*
-.dvc
 data

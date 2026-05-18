@@ -28,8 +28,12 @@ def load_production_model() -> None:
     mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "credit-fraud-detector"))
 
     model_uri = get_production_model_uri()
-    production_model = mlflow.pyfunc.load_model(model_uri)
-    production_model_uri = model_uri
+    try:
+        production_model = mlflow.pyfunc.load_model(model_uri)
+        production_model_uri = model_uri
+    except Exception:
+        production_model = None
+        production_model_uri = None
 
 
 @asynccontextmanager

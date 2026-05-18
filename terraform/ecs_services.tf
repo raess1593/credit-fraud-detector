@@ -266,7 +266,7 @@ resource "aws_ecs_task_definition" "training" {
       command = [
         "/bin/sh",
         "-c",
-        "dvc init -q --no-scm && dvc remote add -f -d storage $${DVC_REMOTE_URL} && dvc pull && dagster job execute -f orchestration/defs.py -j training_job"
+        "dvc init -q --no-scm && dvc remote add -f -d storage $${DVC_REMOTE_URL} && if [ -f dvc.lock ]; then dvc pull; else echo 'dvc.lock not found; running without pull'; fi && dagster job execute -f orchestration/defs.py -j training_job"
       ]
     }
   ])

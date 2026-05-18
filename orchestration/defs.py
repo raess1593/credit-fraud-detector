@@ -9,6 +9,8 @@ from train import run_training
 @op
 def fetch_data_op() -> str:
     output_path = os.getenv("DATA_PATH", "data/raw/creditcard.parquet")
+    if os.path.exists(output_path):
+        return output_path
     return fetch_data(output_path)
 
 
