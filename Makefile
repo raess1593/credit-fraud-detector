@@ -1,4 +1,4 @@
-.PHONY: lint test train mlflow api terraform
+.PHONY: lint test train mlflow api terraform destroy
 
 lint:
 	black --check src tests api train.py
@@ -22,3 +22,6 @@ api:
 
 terraform:
 	cd terraform && terraform init && terraform apply -var-file=dev.tfvars -auto-approve
+
+destroy:
+	cd terraform && terraform destroy -var-file=dev.tfvars -auto-approve
